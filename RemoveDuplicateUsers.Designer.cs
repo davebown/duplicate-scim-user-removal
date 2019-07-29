@@ -1,4 +1,4 @@
-﻿namespace Remove_duplicate_groups
+﻿namespace Remove_duplicate_users
 {
     partial class RemoveDuplicateUsers
     {

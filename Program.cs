@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Remove_duplicate_groups
+namespace Remove_duplicate_users
 {
     static class Program
     {

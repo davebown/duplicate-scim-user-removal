@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using Collabco.Myday.Scim;
 using Polly;
 
-namespace Remove_duplicate_groups
+namespace Remove_duplicate_users
 {
     public partial class RemoveDuplicateUsers : Form
     {
@@ -167,7 +167,7 @@ namespace Remove_duplicate_groups
         {
             var scimConfig = new Collabco.Myday.Scim.Configuration.ScimConfiguration
             {
-                BaseUrl = $"https://scim.myday.cloud/{txt_TenantId.Text}/v2",
+                BaseUrl = $"https://scim.uk.myday.cloud/{txt_TenantId.Text}/v2",
                 DefaultSearchPageSize = 100
             };
 
