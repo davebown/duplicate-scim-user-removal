@@ -81,15 +81,23 @@ namespace Remove_duplicate_users
                 totalUserCount += usersPage.Resources.Count();                
                 startIndex += usersPage.ItemsPerPage;
 
-                foreach(var group in usersPage.Resources.Where(g => !string.IsNullOrEmpty(g.ExternalId)))
+                foreach(var user in usersPage.Resources.Where(g => !string.IsNullOrEmpty(g.ExternalId)))
                 {
-                    if(users.ContainsKey(group.ExternalId))
+                    if (users.TryGetValue(user.ExternalId, out Collabco.Myday.Scim.v2.Model.ScimUser2 existingUser))
                     {
-                        duplicateUserIds.Add(group.Id);
+                        if (SuperceedsExistingUser(existingUser, user))
+                        {
+                            users[user.ExternalId] = user;
+                            duplicateUserIds.Add(existingUser.Id);
+                        }
+                        else
+                        {
+                            duplicateUserIds.Add(user.Id);
+                        }
                     }
                     else
                     {
-                        users.Add(group.ExternalId, group);
+                        users[user.ExternalId] = user;
                     }
                 }
 
@@ -167,7 +175,7 @@ namespace Remove_duplicate_users
         {
             var scimConfig = new Collabco.Myday.Scim.Configuration.ScimConfiguration
             {
-                BaseUrl = $"https://scim.uk.myday.cloud/{txt_TenantId.Text}/v2",
+                BaseUrl = $"{txt_ScimUrl.Text}/{txt_TenantId.Text}/v2",
                 DefaultSearchPageSize = 100
             };
 
@@ -198,6 +206,28 @@ namespace Remove_duplicate_users
                 current = Math.Min(max, Math.Max(seed, current * 3 * jitterer.NextDouble())); // adopting the 'Decorrelated Jitter' formula from https://www.awsarchitectureblog.com/2015/03/backoff.html.  Can be between seed and previous * 3.  Mustn't exceed max.
                 yield return TimeSpan.FromMilliseconds(current);
             }
+        }
+
+        private bool SuperceedsExistingUser(Collabco.Myday.Scim.v2.Model.ScimUser2 existingtUser, Collabco.Myday.Scim.v2.Model.ScimUser2 duplicateUser)
+        {
+            ////Superceed if duplicate user is active and existing user is not
+            //bool superceed = !(existingtUser.Active ?? false) && (duplicateUser.Active ?? false);
+
+            //if (!superceed)
+            //{
+            //    //Superceed if duplicate user has UserType 'AzureAD' and existing user does not
+            //    superceed = existingtUser.UserType != "AzureAD" && duplicateUser.UserType == "AzureAD";
+            //}
+
+            //if (!superceed)
+            //{
+            //    //Superceed if duplicate user has more identityProviders associated that the existing user
+            //    var existingUserIdProviders = existingtUser.Extension<Collabco.Myday.Scim.v2.Model.MydayUser2Extension>()?.IdentityProviders;
+            //    var duplicateUserIdProviders = duplicateUser.Extension<Collabco.Myday.Scim.v2.Model.MydayUser2Extension>()?.IdentityProviders;
+            //    superceed = duplicateUserIdProviders != null && duplicateUserIdProviders.Count > (existingUserIdProviders?.Count ?? 0);
+            //}
+
+            return duplicateUser.Meta.Created < existingtUser.Meta.Created;
         }
     }
 }
